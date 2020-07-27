@@ -76,12 +76,14 @@ Promise.all([getCOVID, gettopoIDN])
         });
         console.log('covidData formatted', data);
 
-        const domain = d3.extent(covidData, d => d.kasusPosi);
+        const domain = [d3.min(covidData, d => d.kasusPosi), d3.max(covidData, d => d.kasusPosi)];
+        const domainInverted = [d3.max(covidData, d => d.kasusPosi), d3.min(covidData, d => d.kasusPosi)];
         console.log('domain', domain)
         const interpolateScale = d3.scaleLinear(domain, [0, 1]); // experimental color
 
         console.log('feature', topojson.feature(topoIDN, topoIDN.objects.provinces))
         console.log('mesh', topojson.mesh(topoIDN, topoIDN.objects.provinces, (a, b) => a !== b))
+
         let provinsiFromTopo = [];
         const tooltip = document.querySelector('#tooltip');
         // provinsi path
@@ -93,7 +95,7 @@ Promise.all([getCOVID, gettopoIDN])
             .attr('class', 'provinsi')
             .attr('fill', d => {
                 provinsiFromTopo.push(d.properties['provinsi']);
-                return d3.interpolateWarm(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
+                return d3.interpolateOrRd(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
             })
             .attr('stroke', 'black')
             .attr('stroke-width', 0.16)
@@ -279,7 +281,7 @@ Promise.all([getCOVID, gettopoIDN])
             return svg.node();
         }
 
-        const legendScale = d3.scaleSequential(domain, d3.interpolateWarm); // experimental color
+        const legendScale = d3.scaleSequential(domain, d3.interpolateOrRd); // experimental color
         SVG_IDN_MAP.append('g')
             .attr('transform', `translate(900, -80)`)
             .append(() => legend({ color: legendScale, width: 260, title: 'COVID-19 Confirmed Cases (Person)' }));
