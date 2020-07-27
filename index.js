@@ -95,7 +95,7 @@ Promise.all([getCOVID, gettopoIDN])
             .attr('class', 'provinsi')
             .attr('fill', d => {
                 provinsiFromTopo.push(d.properties['provinsi']);
-                return d3.interpolateOrRd(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
+                return d3.interpolateTurbo(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
             })
             .attr('stroke', 'black')
             .attr('stroke-width', 0.16)
@@ -281,7 +281,7 @@ Promise.all([getCOVID, gettopoIDN])
             return svg.node();
         }
 
-        const legendScale = d3.scaleSequential(domain, d3.interpolateOrRd); // experimental color
+        const legendScale = d3.scaleSequential(domain, d3.interpolateTurbo); // experimental color
         SVG_IDN_MAP.append('g')
             .attr('transform', `translate(900, -80)`)
             .append(() => legend({ color: legendScale, width: 260, title: 'COVID-19 Confirmed Cases (Person)' }));
