@@ -16,6 +16,23 @@ const gettopoIDN = axios.get(urltopoIDN);
 
 Promise.all([getCOVID, gettopoIDN])
     .then(results => {
+        const covidData = results[0].data.data;
+        const topoIDN = results[1].data;
+        console.log('getCOVID', covidData);
+        console.log('getTopoIDN', topoIDN);
+
+        const data = {};
+        covidData.forEach(item => {
+            if (item.provinsi === 'DKI Jakarta') item.provinsi = 'Jakarta';
+            if (item.provinsi === 'Daerah Istimewa Yogyakarta') item.provinsi = 'Yogyakarta';
+
+            data[item.provinsi] = {
+                kasusPosi: item['kasusPosi'],
+                kasusMeni: item['kasusMeni'],
+                kasusSemb: item['kasusSemb']
+            };
+        });
+        console.log('covidData formatted', data);
 
         const projection = d3.geoMercator()
             .center([118.25, - 5])
@@ -58,24 +75,6 @@ Promise.all([getCOVID, gettopoIDN])
             .style('font-weight', 'bold')
             .style('font-weight', 300)
             .text('COVID-19 Real-Time Map');
-
-        const covidData = results[0].data.data;
-        const topoIDN = results[1].data;
-        console.log('getCOVID', covidData);
-        console.log('getTopoIDN', topoIDN);
-
-        const data = {};
-        covidData.forEach(item => {
-            if (item.provinsi === 'DKI Jakarta') item.provinsi = 'Jakarta';
-            if (item.provinsi === 'Daerah Istimewa Yogyakarta') item.provinsi = 'Yogyakarta';
-
-            data[item.provinsi] = {
-                kasusPosi: item['kasusPosi'],
-                kasusMeni: item['kasusMeni'],
-                kasusSemb: item['kasusSemb']
-            };
-        });
-        console.log('covidData formatted', data);
 
         const kasusMinMax = [d3.min(covidData, d => d.kasusPosi), d3.max(covidData, d => d.kasusPosi)];
         console.log('kasusMinMax', kasusMinMax)
