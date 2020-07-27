@@ -11,7 +11,6 @@ body {
 
 .container {
     margin: 1em;
-    border: 1px solid black;
     border-radius: 4px;
     width: 1500px;
     height: wrap;
@@ -24,7 +23,8 @@ body {
     background-color: #34495e;
     height: 1em;
     padding: 6px 12px;
-    opacity: 0;
+    opacity: 0.8;
+    visibility: hidden;
     border-radius: 4px;
     width: max-content;
     height: max-content;

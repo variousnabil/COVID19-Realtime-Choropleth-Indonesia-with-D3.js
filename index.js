@@ -24,8 +24,6 @@ const SVG_HEADER = d3.select('.container')
 const SVG_IDN_MAP = d3.select('.container')
     .append('svg')
     .attr('id', 'IDNMAP')
-    // .attr('width', 1000)
-    // .attr('height', 400)
     .attr('viewBox', [-115, 0, 1400, 530]);
 
 SVG_HEADER.append('text')
@@ -35,7 +33,7 @@ SVG_HEADER.append('text')
     .attr('id', 'title')
     .style('font-size', '2em')
     .style('font-weight', 'bold')
-    .text('Indonesia Realtime COVID19 Data');
+    .text('Indonesia Realtime COVID19 Data (Provinces)');
 
 const getCOVID = axios.get(urlCOVID);
 const gettopoIDN = axios.get(urltopoIDN);
@@ -68,33 +66,38 @@ Promise.all([getCOVID, gettopoIDN])
         console.log('feature', topojson.feature(topoIDN, topoIDN.objects.provinces))
         console.log('mesh', topojson.mesh(topoIDN, topoIDN.objects.provinces, (a, b) => a !== b))
         let provinsiFromTopo = [];
-
+        const tooltip = document.querySelector('#tooltip');
         // provinsi path
         SVG_IDN_MAP.append('g')
             .selectAll('path')
             .data(topojson.feature(topoIDN, topoIDN.objects.provinces).features)
-            .join('path')
+            .enter()
+            .append('path')
             .attr('class', 'provinsi')
             .attr('fill', d => {
                 provinsiFromTopo.push(d.properties['provinsi']);
                 return d3.interpolateWarm(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
-            }).attr('d', path)
+            })
+            .attr('d', path)
             .on('mouseover', (d, i) => {
-                const tooltip = document.querySelector('#tooltip');
                 const provinsi = d.properties['provinsi'];
-                tooltip.style.opacity = 0.8;
-                tooltip.style.left = d3.event.pageX + 10;
-                tooltip.style.top = d3.event.pageY - 10;
-                tooltip.innerHTML = `${provinsi}, 
-                <br>Confirmed: ${data[provinsi].kasusPosi} 
-                <br>Death: ${data[provinsi].kasusMeni}
-                <br>Recovered: ${data[provinsi].kasusSemb}`
+                tooltip.style.visibility = 'visible';
+                tooltip.style.left = d3.event.pageX - 65;
+                tooltip.style.top = d3.event.pageY - 90;
+                tooltip.innerHTML = `${provinsi} 
+                <br>Confirmed: ${(data[provinsi].kasusPosi).toLocaleString()} 
+                <br>Death: ${(data[provinsi].kasusMeni).toLocaleString()}
+                <br>Recovered: ${(data[provinsi].kasusSemb).toLocaleString()}`
             })
             .on('mouseout', (d, i) => {
-                const tooltip = document.querySelector('#tooltip');
-                tooltip.style.opacity = 0;
+                tooltip.style.visibility = 'hidden';
                 tooltip.style.right = 0;
                 tooltip.style.top = 0;
+            })
+            .on('mousemove', d => {
+                tooltip.style.visibility = 'visible';
+                tooltip.style.left = d3.event.pageX - 65;
+                tooltip.style.top = d3.event.pageY - 90;
             });
         let provinsiFromCOVID = Object.keys(data);
         console.log('provinsiFromTopo', provinsiFromTopo);
@@ -256,8 +259,7 @@ Promise.all([getCOVID, gettopoIDN])
             return svg.node();
         }
 
-        const p = Math.max(0, d3.precisionFixed(0.05) - 2),
-            legendScale = d3.scaleSequential(domain, d3.interpolateWarm); // experimental color
+        const legendScale = d3.scaleSequential(domain, d3.interpolateWarm); // experimental color
         SVG_IDN_MAP.append('g')
             .attr('transform', `translate(850, 0)`)
             .append(() => legend({ color: legendScale, width: 260, title: 'Confirmed COVID19 Cases (Person)' }));
