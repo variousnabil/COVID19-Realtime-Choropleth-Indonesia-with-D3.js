@@ -1,7 +1,7 @@
 const urlCOVID = 'https://indonesia-covid-19-api.now.sh/api/provinsi';
 const urltopoIDN = 'https://raw.githubusercontent.com/ghapsara/indonesia-atlas/master/provinsi/provinces-simplified-topo.json';
 
-const w = 1300;
+const w = 1600;
 const h = 600;
 
 const margin = {
@@ -14,26 +14,44 @@ const margin = {
 const projection = d3.geoMercator()
     .center([118.25, - 5])
     .scale(w * 1.2)
-    .translate([w / 2 - 60, h / 2]);
+    .translate([w / 2 - 200, h / 2]);
 const path = d3.geoPath(projection);
 
 const SVG_HEADER = d3.select('.container')
     .append('svg')
-    .attr('viewBox', [0, 0, w, 150]);
+    .attr('id', 'SVGHEADER')
+    .attr('viewBox', [0, 0, w, 80]);
 
 const SVG_IDN_MAP = d3.select('.container')
     .append('svg')
-    .attr('id', 'IDNMAP')
-    .attr('viewBox', [-115, 0, 1400, 530]);
+    .attr('id', 'SVGMAP')
+    .attr('viewBox', [-200, -80, 1550, 595]);
+
+const SVG_FOOTER = d3.select('.container')
+    .append('svg')
+    .attr('id', 'SVGFOOTER')
+    .attr('viewBox', [0, 0, 1550, 30]);
 
 SVG_HEADER.append('text')
     .attr('x', w / 2)
-    .attr('y', margin.top * 2)
+    .attr('y', margin.top - 9)
     .attr('text-anchor', 'middle')
     .attr('id', 'title')
-    .style('font-size', '2em')
+    .style('font-size', '1.8em')
     .style('font-weight', 'bold')
-    .text('Indonesia Realtime COVID19 Data (Provinces)');
+    .style('letter-spacing', 3)
+    .style('font-weight', 300)
+    .text('Indonesia');
+
+SVG_HEADER.append('text')
+    .attr('x', w / 2)
+    .attr('y', margin.top + 20)
+    .attr('text-anchor', 'middle')
+    .attr('id', 'title')
+    .style('font-size', '1.2em')
+    .style('font-weight', 'bold')
+    .style('font-weight', 300)
+    .text('COVID-19 Real-Time Map');
 
 const getCOVID = axios.get(urlCOVID);
 const gettopoIDN = axios.get(urltopoIDN);
@@ -43,9 +61,8 @@ Promise.all([getCOVID, gettopoIDN])
         const covidData = results[0].data.data;
         const topoIDN = results[1].data;
         console.log('getCOVID', covidData);
-        console.log('gettopoIDN', topoIDN);
+        console.log('getTopoIDN', topoIDN);
 
-        // education data simplified only 'id' and 'bachelorsOrHigher' data.
         const data = {};
         covidData.forEach(item => {
             if (item.provinsi === 'DKI Jakarta') item.provinsi = 'Jakarta';
@@ -78,12 +95,15 @@ Promise.all([getCOVID, gettopoIDN])
                 provinsiFromTopo.push(d.properties['provinsi']);
                 return d3.interpolateWarm(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
             })
+            .attr('stroke', 'black')
+            .attr('stroke-width', 0.16)
+            .attr('stroke-linejoin', 'round')
             .attr('d', path)
             .on('mouseover', (d, i) => {
                 const provinsi = d.properties['provinsi'];
                 tooltip.style.visibility = 'visible';
                 tooltip.style.left = d3.event.pageX - 65;
-                tooltip.style.top = d3.event.pageY - 90;
+                tooltip.style.top = d3.event.pageY - 135;
                 tooltip.innerHTML = `${provinsi} 
                 <br>Confirmed: ${(data[provinsi].kasusPosi).toLocaleString()} 
                 <br>Death: ${(data[provinsi].kasusMeni).toLocaleString()}
@@ -97,7 +117,7 @@ Promise.all([getCOVID, gettopoIDN])
             .on('mousemove', d => {
                 tooltip.style.visibility = 'visible';
                 tooltip.style.left = d3.event.pageX - 65;
-                tooltip.style.top = d3.event.pageY - 90;
+                tooltip.style.top = d3.event.pageY - 135;
             });
         let provinsiFromCOVID = Object.keys(data);
         console.log('provinsiFromTopo', provinsiFromTopo);
@@ -261,6 +281,13 @@ Promise.all([getCOVID, gettopoIDN])
 
         const legendScale = d3.scaleSequential(domain, d3.interpolateWarm); // experimental color
         SVG_IDN_MAP.append('g')
-            .attr('transform', `translate(850, 0)`)
-            .append(() => legend({ color: legendScale, width: 260, title: 'Confirmed COVID19 Cases (Person)' }));
+            .attr('transform', `translate(900, -80)`)
+            .append(() => legend({ color: legendScale, width: 260, title: 'COVID-19 Confirmed Cases (Person)' }));
+
+        SVG_FOOTER.append('text')
+            .attr('x', 780)
+            .attr('y', 30)
+            .style('font-weight', 100)
+            .attr('text-anchor', 'middle')
+            .html('Source Data: <a href="https://github.com/mathdroid/indonesia-covid-19-api" id="sourceLink">mathdroid</a>, 2020 Indonesia COVID-19.');
     });

@@ -1,18 +1,19 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: "Roboto", sans-serif;
 }
 
 body {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
 
 .container {
     margin: 1em;
     border-radius: 4px;
-    width: 1500px;
+    width: 1600px;
     height: wrap;
 }
 
@@ -22,14 +23,24 @@ body {
     left: 0;
     background-color: #34495e;
     height: 1em;
-    padding: 6px 12px;
+    padding: 1em;
     opacity: 0.8;
+    line-height: 1.5em;
     visibility: hidden;
     border-radius: 4px;
+    font-size: 1em;
     width: max-content;
     height: max-content;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#sourceLink {
+    fill: #349888;
+}
+
+#sourceLink:hover {
+    fill: black;
 }
