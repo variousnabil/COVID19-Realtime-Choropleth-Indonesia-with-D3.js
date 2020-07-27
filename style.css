@@ -1,0 +1,35 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    margin: 1em;
+    border: 1px solid black;
+    border-radius: 4px;
+    width: 1500px;
+    height: wrap;
+}
+
+#tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #34495e;
+    height: 1em;
+    padding: 6px 12px;
+    opacity: 0;
+    border-radius: 4px;
+    width: max-content;
+    height: max-content;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
