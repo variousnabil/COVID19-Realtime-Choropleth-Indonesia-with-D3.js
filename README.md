@@ -7,6 +7,6 @@ just hover your mouse cursor to the certain province area that you wanted to see
 # Link to the Site
 https://variousnabil.github.io/Indonesia-COVID19-Realtime-Map/
 
-# Source API (●'◡'●)
+# Source API 
 - realtime covid19 indonesia API from https://github.com/mathdroid/indonesia-covid-19-api
 - indonesia TopoJSON file from https://github.com/ghapsara/indonesia-atlas
