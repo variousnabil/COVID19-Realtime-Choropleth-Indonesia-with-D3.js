@@ -16,15 +16,15 @@ const gettopoIDN = axios.get(urltopoIDN);
 
 Promise.all([getCOVID, gettopoIDN])
     .then(results => {
-        const covidData = results[0].data.data;
+        const covidData = results[0].data.data.filter(item => item.provinsi !== "Indonesia");
         const topoIDN = results[1].data;
-        console.log('getCOVID', covidData);
-        console.log('getTopoIDN', topoIDN);
+        let provinsiFromTopo = topoIDN.objects.provinces.geometries.map(item => item.properties.provinsi);
 
         const data = {};
         covidData.forEach(item => {
             if (item.provinsi === 'DKI Jakarta') item.provinsi = 'Jakarta';
             if (item.provinsi === 'Daerah Istimewa Yogyakarta') item.provinsi = 'Yogyakarta';
+            if (item.provinsi === 'Bangka Belitung') item.provinsi = 'Kepulauan Bangka Belitung';
 
             data[item.provinsi] = {
                 kasusPosi: item['kasusPosi'],
@@ -32,7 +32,22 @@ Promise.all([getCOVID, gettopoIDN])
                 kasusSemb: item['kasusSemb']
             };
         });
+        let provinsiFromCOVID = Object.keys(data);
+
+        //logging
+        console.log('getCOVID', covidData);
+        console.log('getTopoIDN', topoIDN);
         console.log('covidData formatted', data);
+
+        console.log('provinsiFromTopo', provinsiFromTopo);
+        console.log('provinsiFromCOVID', provinsiFromCOVID);
+        console.log('ada di provinsiCOVID tapi gak ada di provinsiTopo', provinsiFromCOVID.filter(item => {
+            return !provinsiFromTopo.includes(item)
+        }));
+        console.log('ada di provinsiTopo tapi gak ada di provinsiCOVID', provinsiFromTopo.filter(item => {
+            return !provinsiFromCOVID.includes(item)
+        }));
+        //
 
         const projection = d3.geoMercator()
             .center([118.25, - 5])
@@ -84,7 +99,6 @@ Promise.all([getCOVID, gettopoIDN])
         console.log('feature', topojson.feature(topoIDN, topoIDN.objects.provinces))
         console.log('mesh', topojson.mesh(topoIDN, topoIDN.objects.provinces, (a, b) => a !== b))
 
-        let provinsiFromTopo = [];
         const tooltip = document.querySelector('#tooltip');
         // provinsi path
         SVG_IDN_MAP.append('g')
@@ -122,20 +136,8 @@ Promise.all([getCOVID, gettopoIDN])
             .delay(function (d, i) { return i * 30; })
             .ease(d3.easeLinear)
             .attr('fill', d => {
-                provinsiFromTopo.push(d.properties['provinsi']);
                 return d3.interpolateTurbo(interpolateScale(data[`${d.properties['provinsi']}`].kasusPosi)) // experimental color
             });
-
-        // logging
-        let provinsiFromCOVID = Object.keys(data);
-        console.log('provinsiFromTopo', provinsiFromTopo);
-        console.log('provinsiFromCOVID', provinsiFromCOVID);
-        console.log('ada di provinsiCOVID tapi gak ada di provinsiTopo', provinsiFromCOVID.filter(item => {
-            return !provinsiFromTopo.includes(item)
-        }));
-        console.log('ada di provinsiTopo tapi gak ada di provinsiCOVID', provinsiFromTopo.filter(item => {
-            return !provinsiFromCOVID.includes(item)
-        }));
 
         // ramp template from https://observablehq.com/@d3/color-legend
         function ramp(color, n = 256) {
